@@ -1,10 +1,10 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { createProduct, mockUploadImage, getProductById, updateProduct } from '../services/mockStorage';
+import { createProduct, mockUploadImage, getProductById, updateProduct, deleteProduct } from '../services/mockStorage';
 import { analyzeProductImages } from '../services/geminiService';
 import { ProductCondition } from '../types';
-import { Upload, Loader2, CheckCircle, Sparkles, X } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, Sparkles, X, Trash2 } from 'lucide-react';
 
 const CONDITION_RATIOS = {
   [ProductCondition.NEW]: 0.92,      // ~90-95%
@@ -183,6 +183,22 @@ const Sell: React.FC = () => {
       const ratio = CONDITION_RATIOS[newCondition] || 1;
       const newPrice = Math.round(basePrice * ratio);
       setPrice(newPrice);
+    }
+  };
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!id) return;
+    if (window.confirm('確定要刪除此商品嗎？此動作無法復原。')) {
+      try {
+         await deleteProduct(id);
+         navigate('/');
+      } catch (error: any) {
+         console.error(error);
+         alert('刪除失敗: ' + (error.message || '未知錯誤'));
+      }
     }
   };
 
@@ -391,10 +407,20 @@ const Sell: React.FC = () => {
                 </div>
              )}
 
-             <div className="pt-4">
+             <div className="pt-4 flex gap-3">
+               {isEditMode && (
+                 <button
+                   type="button"
+                   onClick={handleDelete}
+                   className="flex-1 bg-red-50 text-red-500 hover:bg-red-100 font-bold py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2"
+                 >
+                   <Trash2 className="w-5 h-5" />
+                   刪除商品
+                 </button>
+               )}
                <button 
                  type="submit"
-                 className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-slate-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                 className={`bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-slate-900/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 ${isEditMode ? 'flex-[2]' : 'w-full'}`}
                >
                  <CheckCircle className="w-5 h-5" />
                  {isEditMode ? '儲存變更' : '確認上架'}

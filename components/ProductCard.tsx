@@ -23,7 +23,7 @@ const conditionLabels: Record<ProductCondition, string> = {
 
 const ProductCard: React.FC<Props> = ({ product }) => {
   return (
-    <Link to={`/product/${product.id}`} className="group block bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+    <Link to={`/product/${product.id}`} className="group block bg-white rounded-2xl overflow-hidden border border-slate-200 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full flex flex-col">
       <div className="aspect-[4/3] overflow-hidden bg-slate-100 relative">
         <img 
           src={product.images[0]} 
@@ -36,10 +36,11 @@ const ProductCard: React.FC<Props> = ({ product }) => {
           </span>
         </div>
       </div>
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-base font-semibold text-slate-900 line-clamp-1">{product.title}</h3>
+      <div className="p-4 flex flex-col flex-1">
+        <div className="mb-2">
+          <h3 className="text-base font-semibold text-slate-900 line-clamp-2 leading-snug">{product.title}</h3>
         </div>
+        
         <div className="flex flex-wrap gap-1 mb-3">
            {product.tags.slice(0, 2).map(tag => (
              <span key={tag} className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded flex items-center">
@@ -47,12 +48,13 @@ const ProductCard: React.FC<Props> = ({ product }) => {
              </span>
            ))}
         </div>
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center gap-2">
-             <img src={product.sellerAvatar || `https://ui-avatars.com/api/?name=${product.sellerNickname}`} className="w-6 h-6 rounded-full" alt="seller"/>
-             <span className="text-xs text-slate-500 truncate max-w-[80px]">{product.sellerNickname}</span>
-          </div>
+
+        <div className="mt-auto pt-3 border-t border-slate-50 flex flex-col gap-2">
           <span className="text-lg font-bold text-primary">NT$ {product.price.toLocaleString()}</span>
+          <div className="flex items-center gap-2">
+             <img src={product.sellerAvatar || `https://ui-avatars.com/api/?name=${product.sellerNickname}`} className="w-5 h-5 rounded-full border border-slate-100" alt="seller"/>
+             <span className="text-xs text-slate-500 truncate">{product.sellerNickname}</span>
+          </div>
         </div>
       </div>
     </Link>

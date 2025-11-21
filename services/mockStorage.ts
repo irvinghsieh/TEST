@@ -1,4 +1,5 @@
 
+
 import { Product, User, ProductCondition, ProductStatus, Comment } from "../types";
 
 const USERS_KEY = 'uni_users';
@@ -198,12 +199,16 @@ export const updateProduct = async (id: string, updates: Partial<Product>): Prom
 };
 
 export const deleteProduct = async (productId: string): Promise<void> => {
-  const products: Product[] = JSON.parse(localStorage.getItem(PRODUCTS_KEY) || '[]');
-  const index = products.findIndex(p => p.id === productId);
-  if (index !== -1) {
-    products[index].status = ProductStatus.DELETED;
-    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+  let products: Product[] = JSON.parse(localStorage.getItem(PRODUCTS_KEY) || '[]');
+  const initialLength = products.length;
+  
+  // Ensure strict string comparison
+  products = products.filter(p => String(p.id) !== String(productId));
+  
+  if (products.length === initialLength) {
+     throw new Error("Product not found or already deleted");
   }
+  localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
 };
 
 // --- Comment Services ---

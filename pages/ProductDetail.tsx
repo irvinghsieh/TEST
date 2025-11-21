@@ -8,6 +8,7 @@ import { ArrowLeft, Tag, Instagram, Facebook, MessageCircle, Trash2, Sparkles, E
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | undefined>(undefined);
+  const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -15,10 +16,21 @@ const ProductDetail: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (id) {
-      getProductById(id).then(setProduct);
-      loadComments(id);
-    }
+    const fetchData = async () => {
+      if (id) {
+        setLoading(true);
+        try {
+          const p = await getProductById(id);
+          setProduct(p);
+          await loadComments(id);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchData();
     setCurrentUser(getCurrentUser());
   }, [id]);
 
@@ -27,10 +39,23 @@ const ProductDetail: React.FC = () => {
     setComments(data);
   };
 
-  const handleDelete = async () => {
-    if (window.confirm('確定要刪除此商品嗎？')) {
-       if(id) await deleteProduct(id);
-       navigate('/');
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!id) {
+        alert("錯誤：找不到商品 ID");
+        return;
+    }
+    
+    if (window.confirm('確定要刪除此商品嗎？此動作無法復原。')) {
+       try {
+          await deleteProduct(id);
+          navigate('/');
+       } catch (error: any) {
+          console.error(error);
+          alert('刪除失敗: ' + (error.message || '未知錯誤'));
+       }
     }
   };
 
@@ -48,7 +73,20 @@ const ProductDetail: React.FC = () => {
     }
   };
 
-  if (!product) return <div className="min-h-screen flex justify-center items-center text-slate-500">Loading...</div>;
+  if (loading) {
+    return <div className="min-h-screen flex justify-center items-center text-slate-500">Loading...</div>;
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex flex-col justify-center items-center bg-slate-50">
+        <p className="text-lg text-slate-600 mb-4">找不到此商品，可能已被刪除。</p>
+        <Link to="/" className="px-6 py-2 bg-slate-900 text-white rounded-full hover:bg-slate-800 transition-colors">
+          回首頁
+        </Link>
+      </div>
+    );
+  }
 
   const isOwner = currentUser?.id === product.sellerId;
 
@@ -151,7 +189,7 @@ const ProductDetail: React.FC = () => {
                    <Link to={`/edit/${product.id}`} className="bg-slate-100 text-slate-600 hover:bg-slate-200 p-2 rounded-lg transition-colors flex flex-col items-center text-xs min-w-[60px]">
                       <Edit className="w-5 h-5 mb-1" /> 編輯
                    </Link>
-                   <button onClick={handleDelete} className="bg-red-50 text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors flex flex-col items-center text-xs min-w-[60px]">
+                   <button type="button" onClick={handleDelete} className="bg-red-50 text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors flex flex-col items-center text-xs min-w-[60px]">
                       <Trash2 className="w-5 h-5 mb-1" /> 刪除
                    </button>
                  </div>

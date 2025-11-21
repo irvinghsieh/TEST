@@ -79,7 +79,6 @@ const Login: React.FC = () => {
               type="password"
               required
               className={inputClasses}
-              defaultValue="password123"
               placeholder="••••••••"
             />
           </div>
