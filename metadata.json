@@ -1,0 +1,7 @@
+{
+  "name": "uni 二手選物平台",
+  "description": "A smart C2C second-hand marketplace powered by Gemini AI for automated product analysis and pricing.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
